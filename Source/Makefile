@@ -181,16 +181,15 @@ LD_FLAGS:= --gc-sections -nostartfiles -Map=GCC_TODO_map?.map -T TODO_linkerscri
 #GCC_TODO: Does -nostartfiles mean we don't need to compile the startup assembly file?
 #LDSCRIPTS=-L. -L$(BASE)/ldscripts -T gcc.ld #From the arm-none-eabi samples
 
-CC_DEFINES:=                \
+SDK_DEFINES:=               \
     LWIP_TIMEVAL_PRIVATE=0  \
-    DEBUG_ON=0              \
-    VERBOSE=1
+    DEBUG_ON=0
 
 ################################################################################
 # Prepare arguments for GCC. Prepend -L, -I, -D, etc.:
 CC_LIBS     := $(patsubst %, -L%, $(ALL_LIBDIRS))
 CC_INCLUDES := $(patsubst %, -I%, $(INCDIRS))
-CC_DEFINES  := $(patsubst %, -D%, $(CC_DEFINES))
+CC_DEFINES  := $(patsubst %, -D%, $(SDK_DEFINES))
 AS_DEFINES  :=
 
 ################################################################################
