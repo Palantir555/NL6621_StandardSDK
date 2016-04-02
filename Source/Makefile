@@ -10,6 +10,9 @@ UCOS_DIR  =./uCOS-II
 PORTS_DIR =./Ports/Cortex-M3
 SDK_INCDIR=./Include
 
+LWIP_SRCDIR =$(LWIP_DIR)/src
+LWIP_PORTDIR=$(LWIP_DIR)/port
+
 ################################################################################
 # Toolchain:
 TOOLCHAIN_ROOT?=/Users/palantir/Tech/Toolchains/gcc-arm-none-eabi-5_2-2015q4
@@ -27,10 +30,11 @@ OUTPUT_OBJDIR=$(OUTPUT_DIR)/objdir
 
 ################################################################################
 # Include folders:
-LWIP_INCDIRS:=                   \
-    $(LWIP_DIR)/src/include      \
-    $(LWIP_DIR)/src/include/ipv4 \
-    $(LWIP_DIR)/src/include/ipv6 \
+LWIP_INCDIRS:=                      \
+    $(LWIP_DIR)/src/include         \
+    $(LWIP_DIR)/src/include/ipv4    \
+    $(LWIP_DIR)/src/include/ipv6    \
+    $(LWIP_DIR)/port/include/netif  \
     $(LWIP_DIR)/port/include
 
 INCDIRS:=           \
@@ -138,6 +142,26 @@ BSP_SOURCES:=                   \
     $(BSP_DIR)/wdg.c            \
     $(BSP_DIR)/cortexM3_it.c
 
+LWIP_SOURCES:=                      \
+    $(LWIP_PORTDIR)/lwIP.c          \
+    $(LWIP_PORTDIR)/sys_arch.c      \
+    $(LWIP_SRCDIR)/core/def.c       \
+    $(LWIP_SRCDIR)/core/dhcp.c      \
+    $(LWIP_SRCDIR)/core/dns.c       \
+    $(LWIP_SRCDIR)/core/lwip_init.c \
+    $(LWIP_SRCDIR)/core/mem.c       \
+    $(LWIP_SRCDIR)/core/memp.c      \
+    $(LWIP_SRCDIR)/core/netif.c     \
+    $(LWIP_SRCDIR)/core/pbuf.c      \
+    $(LWIP_SRCDIR)/core/raw.c       \
+    $(LWIP_SRCDIR)/core/stats.c     \
+    $(LWIP_SRCDIR)/core/sys.c       \
+    $(LWIP_SRCDIR)/core/tcp.c       \
+    $(LWIP_SRCDIR)/core/tcp_in.c    \
+    $(LWIP_SRCDIR)/core/tcp_out.c   \
+    $(LWIP_SRCDIR)/core/timers.c    \
+    $(LWIP_SRCDIR)/core/udp.c
+
 PORTS_SOURCES:=                 \
     $(PORTS_DIR)/os_cpu_c.c     \
     $(PORTS_DIR)/os_dmem.c
@@ -146,18 +170,20 @@ BOOT_SOURCES:=                     \
     $(BOOT_DIR)/CortexM3_startup.s \
 
 #ALL_SOURCES:= $(SDK_SOURCES) $(UCOS_SOURCES) $(BSP_SOURCES) $(PORTS_SOURCES) \
-#              $(BOOT_SOURCES)
+#              $(BOOT_SOURCES) $(LWIP_SOURCES)
 
 ################################################################################
 # Compiler and linker options (flags and defines):
-CC_FLAGS:= -mthumb -mcpu=cortex-m3 -fno-builtin -lstdint -std=gnu11 -Os -flto \
+CC_FLAGS:= -mthumb -mcpu=cortex-m3 -fno-builtin -lstdint -std=gnu99 -Os -flto \
            -nostdlib -fdata-sections --specs=nosys.specs
 AS_FLAGS:= 
-LD_FLAGS:= --gc-sections -nostartfiles -Map=TODO_map?.map -T TODO_linkerscript.ld
-#TODO: Does -nostartfiles mean we don't need to compile the startup assembly file?
+LD_FLAGS:= --gc-sections -nostartfiles -Map=GCC_TODO_map?.map -T TODO_linkerscript.ld
+#GCC_TODO: Does -nostartfiles mean we don't need to compile the startup assembly file?
 #LDSCRIPTS=-L. -L$(BASE)/ldscripts -T gcc.ld #From the arm-none-eabi samples
 
-CC_DEFINES:=\
+CC_DEFINES:=                \
+    LWIP_TIMEVAL_PRIVATE=0  \
+    DEBUG_ON=0              \
     VERBOSE=1
 
 ################################################################################
@@ -175,6 +201,7 @@ BSP_OBJ  :=$(patsubst $(BSP_DIR)%.c,   $(OUTPUT_OBJDIR)%.o, $(BSP_SOURCES))
 BSP_OBJ  :=$(patsubst $(BSP_DIR)%.s,   $(OUTPUT_OBJDIR)%.o, $(BSP_SOURCES))
 UCOS_OBJ :=$(patsubst $(UCOS_DIR)%.c,  $(OUTPUT_OBJDIR)%.o, $(UCOS_SOURCES))
 BOOT_OBJ :=$(patsubst $(BOOT_DIR)%.s,  $(OUTPUT_OBJDIR)%.o, $(BOOT_SOURCES))
+LWIP_OBJ :=$(patsubst $(LWIP_DIR)%.c,  $(OUTPUT_OBJDIR)%.o, $(LWIP_SOURCES))
 PORTS_OBJ:=$(patsubst $(PORTS_DIR)%.c, $(OUTPUT_OBJDIR)%.o, $(PORTS_SOURCES))
 
 ################################################################################
@@ -184,7 +211,7 @@ MKDIR := mkdir -p
 
 ################################################################################
 # Make Targets - The first target in the Makefile will be used as the default:
-all: $(BOOT_OBJ) $(PORTS_OBJ) $(UCOS_OBJ) $(BSP_OBJ) $(SYS_OBJ)
+all: $(BOOT_OBJ) $(PORTS_OBJ) $(UCOS_OBJ) $(LWIP_OBJ) $(BSP_OBJ) $(SYS_OBJ)
 
 print:
 	@echo $(PORTS_OBJ) $(SYS_OBJ) $(BSP_OBJ) $(UCOS_OBJ)
@@ -204,6 +231,12 @@ $(OUTPUT_OBJDIR)%.o: $(PORTS_DIR)%.c
 	@$(CC) -c $(CC_INCLUDES) $(CC_DEFINES) $(CC_FLAGS) $< -o $@
 
 $(OUTPUT_OBJDIR)%.o: $(UCOS_DIR)%.c
+	@echo "(CC) $<"
+	@echo "$(CC) -c $(CC_INCLUDES) $(CC_DEFINES) $(CC_FLAGS) $< -o $@"
+	@$(MKDIR) $(dir $@)
+	@$(CC) -c $(CC_INCLUDES) $(CC_DEFINES) $(CC_FLAGS) $< -o $@
+
+$(OUTPUT_OBJDIR)%.o: $(LWIP_DIR)%.c
 	@echo "(CC) $<"
 	@echo "$(CC) -c $(CC_INCLUDES) $(CC_DEFINES) $(CC_FLAGS) $< -o $@"
 	@$(MKDIR) $(dir $@)
