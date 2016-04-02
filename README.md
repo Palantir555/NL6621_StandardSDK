@@ -44,9 +44,10 @@ The NL6621:
 
 ## Roadmap
 
-### Write a Makefile that compiles the SDK source code using `arm-none-eabi-gcc`
+### Compile the SDK using GCC
 
-We just want to compile the source code using GCC.
+The first step is to write a [Makefile](Source/Makefile) that compiles the SDK
+using the `arm-none-eabi-gcc` toolchain.
 
 We won't try to link anything because we don't have a GNU linker script yet.
 The idea is to make sure the SDK doesn't have any kind of Keil-specific
