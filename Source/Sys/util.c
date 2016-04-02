@@ -776,7 +776,7 @@ void hex_dump(char *str, unsigned char *pSrcBufVA, unsigned int SrcBufLen)
 #endif
 }
                   
-#if 1
+#if 0
 __asm VOID __aeabi_memcpy(UINT8 *pDest, UINT8  *pSrc, UINT32  Size)
 {    
     cmp  r2, #3
