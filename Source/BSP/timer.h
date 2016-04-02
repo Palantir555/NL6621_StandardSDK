@@ -11,10 +11,14 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 
+#ifndef GCC                                     //If we're compiling with Keil
+#define COMPAT_IRQ __irq                        //  Keil's Toolchain likes __irq
+#else                                           //If we defined GCC
+#define COMPAT_IRQ __attribute__((interrupt))   //  GCC likes __attrib[...]
+#endif /* GCC */
+
 void SysTick_init(void);
-//GCC_TODO: I replaced __irq with __attribute__((interrupt("IRQ"))) to make it
-//          GCC compatible. Test it to make sure it works.
-__attribute__((interrupt("IRQ"))) void SysTickHandler(void);
+COMPAT_IRQ void SysTickHandler(void);
 VOID  BSP_TickInit (VOID);
 VOID BSP_Timer0Init(UINT32 usTime);
 VOID BSP_Timer1Init(UINT32 usTime);
