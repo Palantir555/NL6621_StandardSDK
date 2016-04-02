@@ -1,6 +1,7 @@
 #ifndef TYPES_DEF_H_
 #define TYPES_DEF_H_
 
+#include <stdint.h>
 
 #define IN
 #define OUT
@@ -64,7 +65,7 @@ typedef union _LARGE_INTEGER
         UINT32 LowPart;
         UINT32 HighPart;
     } u;
-    uint64_t QuadPart;
+    int64_t QuadPart;
 } LARGE_INTEGER;
 
 
