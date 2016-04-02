@@ -2,10 +2,10 @@
 
 /*
 ******************************************************************************
-Description: 
+Description:
     This function is called by your application code to define a timer.
-Arguments: 
-    cb          Is a pointer to a callback function that will be called when the timer expires. The 
+Arguments:
+    cb          Is a pointer to a callback function that will be called when the timer expires. The
                  callback function must be declared as follows:
                  
                  void MyCallback (OS_TMR *ptmr, void *p_arg);
@@ -775,10 +775,123 @@ void hex_dump(char *str, unsigned char *pSrcBufVA, unsigned int SrcBufLen)
     printf("\n");
 #endif
 }
-                  
-#if 0
+
+#ifdef GCC
+VOID __aeabi_memcpy(UINT8 *pDest, UINT8  *pSrc, UINT32  Size)
+{
+    __asm__(
+    "    cmp  r2, #3"
+    "    bls.w        _memcpy_lastbytes"
+    "    ands.w       ip, r0, #3"
+    "    beq.w        dst_aligned"
+    "    ldrb.w       r3, [r1], #1"
+    "    cmp.w        ip, #2"
+    "    add  r2, ip"
+    "    it   ls"
+    "    ldrbls.w     ip, [r1], #1"
+    "    strb.w       r3, [r0], #1"
+    "    it   cc"
+    "    ldrbcc.w     r3, [r1], #1"
+    "    sub.w        r2, r2, #4"
+    "    it   ls"
+    "    strbls.w     ip, [r0], #1"
+    "    it   cc"
+    "    strbcc.w     r3, [r0], #1"
+    "    "
+    "dst_aligned     "
+    ""
+    "    ands.w       r3, r1, #3"
+    "    beq.w        __aeabi_memcpy4"
+    "    subs r2, #8"
+    "    "
+    "copy_8_bytes_loop"
+    ""
+    "    bcc.w        copy_less_8_bytes"
+    ""
+    "    ldr.w        r3, [r1], #4"
+    "    subs r2, #8"
+    "    ldr.w        ip, [r1], #4"
+    "    stmia.w      r0!, {r3, ip}"
+    "    b.n  copy_8_bytes_loop"
+    ""
+    "copy_less_8_bytes"
+    ""
+    "    adds r2, r2, #4"
+    "    itt  pl"
+    "    ldrpl.w      r3, [r1], #4"
+    "    strpl.w      r3, [r0], #4"
+    "    nop.w"
+    ""
+    "_memcpy_lastbytes"
+    ""
+    "    lsls r2, r2, #31"
+    "    itt  cs"
+    "    ldrbcs.w     r3, [r1], #1"
+    "    ldrbcs.w     ip, [r1], #1"
+    "    it   mi"
+    "    ldrbmi.w     r2, [r1], #1"
+    "    itt  cs"
+    "    strbcs.w     r3, [r0], #1"
+    "    strbcs.w     ip, [r0], #1"
+    "    it   mi"
+    "    strbmi.w     r2, [r0], #1"
+    "    bx   lr"
+    );
+
+}
+
+VOID __aeabi_memcpy4(UINT8 *pDest, UINT8  *pSrc, UINT32  Size)
+{
+    __asm__(
+    "    push {r4, lr}"
+    "    subs r2, #32"
+    "    bcc.w        copy_16_bytes_loop"
+    ""
+    "copy_32_bytes_loop"
+    ""
+    "    ldmia.w      r1!, {r3, r4, ip, lr}"
+    "    subs r2, #32"
+    "    stmia.w      r0!, {r3, r4, ip, lr}"
+    "    ldmia.w      r1!, {r3, r4, ip, lr}"
+    "    stmia.w      r0!, {r3, r4, ip, lr}"
+    "    bcs.w        copy_32_bytes_loop"
+    ""
+    "copy_16_bytes_loop"
+    ""
+    "    movs.w       ip, r2, lsl #28"
+    "    itt  cs"
+    "    ldmiacs.w    r1!, {r3, r4, ip, lr}"
+    "    stmiacs.w    r0!, {r3, r4, ip, lr}"
+    "    itt  mi"
+    "    ldmiami      r1!, {r3, r4}"
+    "    stmiami      r0!, {r3, r4}"
+    "    ldmia.w      sp!, {r4, lr}"
+    "    movs.w       ip, r2, lsl #30"
+    "    itt  cs"
+    "    ldrcs.w      r3, [r1], #4"
+    "    strcs.w      r3, [r0], #4"
+    "    it   eq"
+    "    bxeq lr"
+    "    "
+    "_memcpy_lastbytes_aligned       "
+    ""
+    "    lsls         r2, r2, #31"
+    "    it           cs"
+    "    ldrhcs.w     r3, [r1], #2"
+    "    it   mi"
+    "    ldrbmi.w     r2, [r1], #1"
+    "    it   cs"
+    "    strhcs.w     r3, [r0], #2"
+    "    it   mi"
+    "    strbmi.w     r2, [r0], #1"
+    "    bx   lr"
+    );
+
+}
+#elif 1 /* If it's not GCC (Keil?) */
+
 __asm VOID __aeabi_memcpy(UINT8 *pDest, UINT8  *pSrc, UINT32  Size)
-{    
+{
     cmp  r2, #3
     bls.w        _memcpy_lastbytes
     ands.w       ip, r0, #3
@@ -796,13 +909,13 @@ __asm VOID __aeabi_memcpy(UINT8 *pDest, UINT8  *pSrc, UINT32  Size)
     strbls.w     ip, [r0], #1
     it   cc
     strbcc.w     r3, [r0], #1
-    
-dst_aligned     
+
+dst_aligned
 
     ands.w       r3, r1, #3
     beq.w        __aeabi_memcpy4
     subs r2, #8
-    
+
 copy_8_bytes_loop
 
     bcc.w        copy_less_8_bytes
@@ -869,8 +982,8 @@ copy_16_bytes_loop
     strcs.w      r3, [r0], #4
     it   eq
     bxeq lr
-    
-_memcpy_lastbytes_aligned       
+
+_memcpy_lastbytes_aligned
 
     lsls         r2, r2, #31
     it           cs
@@ -882,6 +995,7 @@ _memcpy_lastbytes_aligned
     it   mi
     strbmi.w     r2, [r0], #1
     bx   lr
-    
+;
+
 }
-#endif
+#endif /* GCC */
