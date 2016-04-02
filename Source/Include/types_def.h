@@ -55,7 +55,7 @@ typedef char    STRING;
 #define NST_FALSE                              0
 #define NST_TRUE                               1
 
-typedef __int64        UINT64;
+typedef uint64_t        UINT64;
 
 typedef union _LARGE_INTEGER
 {
@@ -64,7 +64,7 @@ typedef union _LARGE_INTEGER
         UINT32 LowPart;
         UINT32 HighPart;
     } u;
-    __int64 QuadPart;
+    uint64_t QuadPart;
 } LARGE_INTEGER;
 
 

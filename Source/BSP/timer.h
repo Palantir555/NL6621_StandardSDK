@@ -12,7 +12,9 @@
 #define TIMER_H_
 
 void SysTick_init(void);
-__irq void SysTickHandler(void);
+//GCC_TODO: I replaced __irq with __attribute__((interrupt("IRQ"))) to make it
+//          GCC compatible. Test it to make sure it works.
+__attribute__((interrupt("IRQ"))) void SysTickHandler(void);
 VOID  BSP_TickInit (VOID);
 VOID BSP_Timer0Init(UINT32 usTime);
 VOID BSP_Timer1Init(UINT32 usTime);
