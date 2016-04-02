@@ -1,0 +1,234 @@
+################################################################################
+# SDK Folders:
+SDK_SRCDIR=./
+LIB_DIR   =./Lib
+SYS_DIR   =./Sys
+BSP_DIR   =./BSP
+LWIP_DIR  =./LwIP
+BOOT_DIR  =./BOOT
+UCOS_DIR  =./uCOS-II
+PORTS_DIR =./Ports/Cortex-M3
+SDK_INCDIR=./Include
+
+################################################################################
+# Toolchain:
+TOOLCHAIN_ROOT?=/Users/palantir/Tech/Toolchains/gcc-arm-none-eabi-5_2-2015q4
+TOOL_PREFIX=$(TOOLCHAIN_ROOT)/bin/arm-none-eabi-
+
+CC=$(TOOL_PREFIX)gcc
+AS=$(TOOL_PREFIX)as
+LD=$(TOOL_PREFIX)ld
+AR=$(TOOL_PREFIX)ar
+
+################################################################################
+# Output folders:
+OUTPUT_DIR=./output
+OUTPUT_OBJDIR=$(OUTPUT_DIR)/objdir
+
+################################################################################
+# Include folders:
+LWIP_INCDIRS:=                   \
+    $(LWIP_DIR)/src/include      \
+    $(LWIP_DIR)/src/include/ipv4 \
+    $(LWIP_DIR)/src/include/ipv6 \
+    $(LWIP_DIR)/port/include
+
+INCDIRS:=           \
+    $(SDK_INCDIR)   \
+    $(SYS_DIR)      \
+    $(UCOS_DIR)     \
+    $(BSP_DIR)      \
+    $(PORTS_DIR)    \
+    $(TOOL_INCDIRS) \
+    $(GCC_LIB)      \
+    $(LWIP_INCDIRS)
+
+################################################################################
+# Object folders (containing pre-compiled libraries and objects for the linker):
+TOOL_LIBDIR:=                                               \
+    $(TOOLCHAIN_ROOT)/arm-none-eabi/lib/armv7-m             \
+    $(TOOLCHAIN_ROOT)/lib/gcc/arm-none-eabi/5.2.1/armv7-m
+
+SDK_LIBDIR:=     \
+    $(LIB_DIR)
+
+ALL_LIBDIRS:= $(TOOL_LIBDIR) $(SDK_LIBDIR)
+
+################################################################################
+# Headers:
+SDK_HEADERS:=                    \
+    $(SDK_INCDIR)/airkiss.h      \
+    $(SDK_INCDIR)/app_cfg.h      \
+    $(SDK_INCDIR)/global.h       \
+    $(SDK_INCDIR)/includes.h     \
+    $(SDK_INCDIR)/param.h        \
+    $(SDK_INCDIR)/rom_hook_tbl.h \
+    $(SDK_INCDIR)/task_util.h    \
+    $(SDK_INCDIR)/types_def.h    \
+    $(SDK_INCDIR)/util.h      
+
+UCOS_HEADERS:=                  \
+    $(UCOS_DIR)/os_app_cfg.h    \
+    $(UCOS_DIR)/os_cfg.h        \
+    $(UCOS_DIR)/ucos_ii.h 
+
+BSP_HEADERS:=                   \
+    $(BSP_DIR)/I2C.h            \
+    $(BSP_DIR)/I2S.h            \
+    $(BSP_DIR)/board.h          \
+    $(BSP_DIR)/bsp.h            \
+    $(BSP_DIR)/dma.h            \
+    $(BSP_DIR)/flash.h          \
+    $(BSP_DIR)/gpio.h           \
+    $(BSP_DIR)/mpu.h            \
+    $(BSP_DIR)/nvic.h           \
+    $(BSP_DIR)/qspi.h           \
+    $(BSP_DIR)/reg.h            \
+    $(BSP_DIR)/sdio.h           \
+    $(BSP_DIR)/spi.h            \
+    $(BSP_DIR)/timer.h          \
+    $(BSP_DIR)/uart.h           \
+    $(BSP_DIR)/wdg.h
+
+PORTS_HEADERS:=                 \
+    $(PORTS_DIR)/os_cpu.h       \
+    $(PORTS_DIR)/os_dmem.h
+
+#ALL_HEADERS := $(SDK_HEADERS) $(UCOS_HEADERS) $(BSP_HEADERS) $(PORTS_HEADERS)
+
+################################################################################
+# Sources:
+SYS_SOURCES:=                   \
+    $(SYS_DIR)/app_main.c       \
+    $(SYS_DIR)/main.c           \
+    $(SYS_DIR)/param.c          \
+    $(SYS_DIR)/rom_hook_tbl.c   \
+    $(SYS_DIR)/sys_mgmt.c       \
+    $(SYS_DIR)/util.c
+
+UCOS_SOURCES:=                  \
+    $(UCOS_DIR)/os_core.c       \
+    $(UCOS_DIR)/os_dbg.c        \
+    $(UCOS_DIR)/os_flag.c       \
+    $(UCOS_DIR)/os_mbox.c       \
+    $(UCOS_DIR)/os_mem.c        \
+    $(UCOS_DIR)/os_mutex.c      \
+    $(UCOS_DIR)/os_q.c          \
+    $(UCOS_DIR)/os_sem.c        \
+    $(UCOS_DIR)/os_task.c       \
+    $(UCOS_DIR)/os_time.c       \
+    $(UCOS_DIR)/os_tmr.c 
+
+BSP_SOURCES:=                   \
+    $(BSP_DIR)/cortexm3_macro.s \
+    $(BSP_DIR)/I2C.c            \
+    $(BSP_DIR)/I2S.c            \
+    $(BSP_DIR)/bsp.c            \
+    $(BSP_DIR)/dma.c            \
+    $(BSP_DIR)/flash.c          \
+    $(BSP_DIR)/gpio.c           \
+    $(BSP_DIR)/mpu.c            \
+    $(BSP_DIR)/nvic.c           \
+    $(BSP_DIR)/printf.c         \
+    $(BSP_DIR)/qspi.c           \
+    $(BSP_DIR)/sdio.c           \
+    $(BSP_DIR)/spi.c            \
+    $(BSP_DIR)/timer.c          \
+    $(BSP_DIR)/uart.c           \
+    $(BSP_DIR)/wdg.c            \
+    $(BSP_DIR)/cortexM3_it.c
+
+PORTS_SOURCES:=                 \
+    $(PORTS_DIR)/os_cpu_c.c     \
+    $(PORTS_DIR)/os_dmem.c
+
+BOOT_SOURCES:=                     \
+    $(BOOT_DIR)/CortexM3_startup.s \
+
+#ALL_SOURCES:= $(SDK_SOURCES) $(UCOS_SOURCES) $(BSP_SOURCES) $(PORTS_SOURCES) \
+#              $(BOOT_SOURCES)
+
+################################################################################
+# Compiler and linker options (flags and defines):
+CC_FLAGS:= -mthumb -mcpu=cortex-m3 -fno-builtin -lstdint -std=gnu11 -Os -flto \
+           -nostdlib -fdata-sections --specs=nosys.specs
+AS_FLAGS:= 
+LD_FLAGS:= --gc-sections -nostartfiles -Map=TODO_map?.map -T TODO_linkerscript.ld
+#TODO: Does -nostartfiles mean we don't need to compile the startup assembly file?
+#LDSCRIPTS=-L. -L$(BASE)/ldscripts -T gcc.ld #From the arm-none-eabi samples
+
+CC_DEFINES:=\
+    VERBOSE=1
+
+################################################################################
+# Prepare arguments for GCC. Prepend -L, -I, -D, etc.:
+CC_LIBS     := $(patsubst %, -L%, $(ALL_LIBDIRS))
+CC_INCLUDES := $(patsubst %, -I%, $(INCDIRS))
+CC_DEFINES  := $(patsubst %, -D%, $(CC_DEFINES))
+AS_DEFINES  :=
+
+################################################################################
+# Build list of targets (The .o files invoked by the File Creation Rules):
+#patsubst(from, to, text): Replaces occurences of `from` in `text` with `to`
+SYS_OBJ  :=$(patsubst $(SYS_DIR)%.c,   $(OUTPUT_OBJDIR)%.o, $(SYS_SOURCES))
+BSP_OBJ  :=$(patsubst $(BSP_DIR)%.c,   $(OUTPUT_OBJDIR)%.o, $(BSP_SOURCES))
+BSP_OBJ  :=$(patsubst $(BSP_DIR)%.s,   $(OUTPUT_OBJDIR)%.o, $(BSP_SOURCES))
+UCOS_OBJ :=$(patsubst $(UCOS_DIR)%.c,  $(OUTPUT_OBJDIR)%.o, $(UCOS_SOURCES))
+BOOT_OBJ :=$(patsubst $(BOOT_DIR)%.s,  $(OUTPUT_OBJDIR)%.o, $(BOOT_SOURCES))
+PORTS_OBJ:=$(patsubst $(PORTS_DIR)%.c, $(OUTPUT_OBJDIR)%.o, $(PORTS_SOURCES))
+
+################################################################################
+# OS Commands:
+RMRF  := rm -rf
+MKDIR := mkdir -p
+
+################################################################################
+# Make Targets - The first target in the Makefile will be used as the default:
+all: $(BOOT_OBJ) $(PORTS_OBJ) $(UCOS_OBJ) $(BSP_OBJ) $(SYS_OBJ)
+
+print:
+	@echo $(PORTS_OBJ) $(SYS_OBJ) $(BSP_OBJ) $(UCOS_OBJ)
+
+clean:
+	@echo "$(RMRF) $(OUTPUT_DIR)"
+	@$(RMRF) $(OUTPUT_DIR)
+
+.PHONY: all clean print
+
+################################################################################
+# File Creation Rules:
+$(OUTPUT_OBJDIR)%.o: $(PORTS_DIR)%.c
+	@echo "(CC) $<"
+	@echo "$(CC) -c $(CC_INCLUDES) $(CC_DEFINES) $(CC_FLAGS) $< -o $@"
+	@$(MKDIR) $(dir $@)
+	@$(CC) -c $(CC_INCLUDES) $(CC_DEFINES) $(CC_FLAGS) $< -o $@
+
+$(OUTPUT_OBJDIR)%.o: $(UCOS_DIR)%.c
+	@echo "(CC) $<"
+	@echo "$(CC) -c $(CC_INCLUDES) $(CC_DEFINES) $(CC_FLAGS) $< -o $@"
+	@$(MKDIR) $(dir $@)
+	@$(CC) -c $(CC_INCLUDES) $(CC_DEFINES) $(CC_FLAGS) $< -o $@
+
+$(OUTPUT_OBJDIR)%.o: $(BSP_DIR)%.c
+	@echo "(CC) $<"
+	@echo "$(CC) -c $(CC_INCLUDES) $(CC_DEFINES) $(CC_FLAGS) $< -o $@"
+	@$(MKDIR) $(dir $@)
+	@$(CC) -c $(CC_INCLUDES) $(CC_DEFINES) $(CC_FLAGS) $< -o $@
+
+$(OUTPUT_OBJDIR)%.o: $(SYS_DIR)%.c
+	@echo "(CC) $<"
+	@echo "$(CC) -c $(CC_INCLUDES) $(CC_DEFINES) $(CC_FLAGS) $< -o $@"
+	@$(MKDIR) $(dir $@)
+	@$(CC) -c $(CC_INCLUDES) $(CC_DEFINES) $(CC_FLAGS) $< -o $@
+
+$(OUTPUT_OBJDIR)%.o: $(BSP_DIR)%.s
+	#@echo "(CC) $<"
+	#@echo "$(AS) -c $(CC_INCLUDES) $(AS_DEFINES) $(AS_FLAGS) $< -o $@"
+	#@$(MKDIR) $(dir $@)
+	#@$(AS) -c $(CC_INCLUDES) $(AS_DEFINES) $(AS_FLAGS) $< -o $@
+
+$(OUTPUT_OBJDIR)%.o: $(BOOT_DIR)%.s
+	#@echo "(CC) $<"
+	#@echo "$(AS) -c $(CC_INCLUDES) $(AS_DEFINES) $(AS_FLAGS) $< -o $@"
+	#@$(MKDIR) $(dir $@)
+	#@$(AS) -c $(CC_INCLUDES) $(AS_DEFINES) $(AS_FLAGS) $< -o $@
