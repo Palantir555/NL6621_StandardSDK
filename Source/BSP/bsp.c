@@ -57,13 +57,22 @@ VOID  BSP_GlobalIrqIntEnable (VOID)
  #ifdef USE_CORTEX_M3
     CPU_IntEn();
  #else
+ #ifndef GCC
  __asm
    {   
       MRS     R0, CPSR
       BIC     R0, R0, #0x80
       MSR     CPSR_c, R0           
    }                
- #endif
+ #else /* GCC */
+ __asm__(
+ "      MRS     R0, CPSR"
+ "      BIC     R0, R0, #0x80"
+ "      MSR     CPSR_c, R0"
+ );
+ #endif /* GCC */
+    
+ #endif /* USE_CORTEX_M3 */
 }
 
 /*
@@ -87,12 +96,20 @@ VOID  BSP_GlobalIrqIntDisable (VOID)
  #ifdef USE_CORTEX_M3
      CPU_IntDis();
  #else
+ #ifndef GCC
      __asm
     {   
        MRS     R0, CPSR 
        ORR     R1, R0, #0x80
        MSR     CPSR_c, R1           
     }
+ #else /* GCC */
+    __asm__(
+    "       MRS     R0, CPSR "
+    "       ORR     R1, R0, #0x80"
+    "       MSR     CPSR_c, R1           "
+    );
+ #endif /* GCC */
 #endif
 }
 

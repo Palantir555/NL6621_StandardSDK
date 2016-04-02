@@ -47,6 +47,7 @@ COMPAT_IRQ void NMIException(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
+#ifndef GCC
 __asm void FaultHandler_asm(void)
 {
     IMPORT FaultHandler_c
@@ -56,6 +57,19 @@ __asm void FaultHandler_asm(void)
     MRSNE  R0, PSP   ; z=0, LR.2=1   0xFFFFFFFD
     B   FaultHandler_c
 }
+#else /* If we're compiling with GCC */
+void FaultHandler_asm(void)
+{
+    __asm__(
+    "    IMPORT FaultHandler_c"
+    "    TST   LR, #4"
+    "    ITE   EQ"
+    "    MRSEQ  R0, MSP   ; z=1, LR.2=0   0xFFFFFFF1/0xFFFFFFF9"
+    "    MRSNE  R0, PSP   ; z=0, LR.2=1   0xFFFFFFFD"
+    "    B   FaultHandler_c"
+    );
+}
+#endif /* GCC */
 
 #define DUMP_SIZE                 256
 #define DUMP_REG_SIZE         32
