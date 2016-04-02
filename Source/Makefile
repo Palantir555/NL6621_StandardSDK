@@ -1,14 +1,14 @@
 ################################################################################
 # SDK Folders:
-SDK_SRCDIR=./
-LIB_DIR   =./Lib
-SYS_DIR   =./Sys
-BSP_DIR   =./BSP
-LWIP_DIR  =./LwIP
-BOOT_DIR  =./BOOT
-UCOS_DIR  =./uCOS-II
-PORTS_DIR =./Ports/Cortex-M3
-SDK_INCDIR=./Include
+SDK_SRCDIR=.
+LIB_DIR   =$(SDK_SRCDIR)/Lib
+SYS_DIR   =$(SDK_SRCDIR)/Sys
+BSP_DIR   =$(SDK_SRCDIR)/BSP
+LWIP_DIR  =$(SDK_SRCDIR)/LwIP
+BOOT_DIR  =$(SDK_SRCDIR)/BOOT
+UCOS_DIR  =$(SDK_SRCDIR)/uCOS-II
+PORTS_DIR =$(SDK_SRCDIR)/Ports/Cortex-M3
+SDK_INCDIR=$(SDK_SRCDIR)/Include
 
 LWIP_SRCDIR =$(LWIP_DIR)/src
 LWIP_PORTDIR=$(LWIP_DIR)/port
@@ -162,26 +162,32 @@ LWIP_SOURCES:=                      \
     $(LWIP_SRCDIR)/core/timers.c    \
     $(LWIP_SRCDIR)/core/udp.c
 
-PORTS_SOURCES:=                 \
-    $(PORTS_DIR)/os_cpu_c.c     \
+PORTS_SOURCES:=               \
+    $(PORTS_DIR)/os_cpu_c.c   \
     $(PORTS_DIR)/os_dmem.c
+
+PORTS_ASM_SOURCES:=           \
+    $(PORTS_DIR)/cpu_a.asm    \
+    $(PORTS_DIR)/os_cpu_a.asm
 
 BOOT_SOURCES:=                     \
     $(BOOT_DIR)/CortexM3_startup.s \
 
 #ALL_SOURCES:= $(SDK_SOURCES) $(UCOS_SOURCES) $(BSP_SOURCES) $(PORTS_SOURCES) \
-#              $(BOOT_SOURCES) $(LWIP_SOURCES)
+#              $(BOOT_SOURCES) $(LWIP_SOURCES) $(PORTS_ASM_SOURCES)
 
 ################################################################################
 # Compiler and linker options (flags and defines):
-CC_FLAGS:= -mthumb -mcpu=cortex-m3 -fno-builtin -lstdint -std=gnu99 -Os -flto \
-           -nostdlib -fdata-sections --specs=nosys.specs
+CC_FLAGS:= -mthumb -mcpu=cortex-m3 -fno-builtin -std=gnu99 -Os -flto -nostdlib \
+           -fdata-sections --specs=nosys.specs -msoft-float -mfix-cortex-m3-ldrd
 AS_FLAGS:= 
 LD_FLAGS:= --gc-sections -nostartfiles -Map=GCC_TODO_map?.map -T TODO_linkerscript.ld
 #GCC_TODO: Does -nostartfiles mean we don't need to compile the startup assembly file?
 #LDSCRIPTS=-L. -L$(BASE)/ldscripts -T gcc.ld #From the arm-none-eabi samples
 
 SDK_DEFINES:=               \
+    GCC                     \
+    USE_CORTEX_M3           \
     LWIP_TIMEVAL_PRIVATE=0  \
     DEBUG_ON=0
 
@@ -195,13 +201,14 @@ AS_DEFINES  :=
 ################################################################################
 # Build list of targets (The .o files invoked by the File Creation Rules):
 #patsubst(from, to, text): Replaces occurences of `from` in `text` with `to`
-SYS_OBJ  :=$(patsubst $(SYS_DIR)%.c,   $(OUTPUT_OBJDIR)%.o, $(SYS_SOURCES))
-BSP_OBJ  :=$(patsubst $(BSP_DIR)%.c,   $(OUTPUT_OBJDIR)%.o, $(BSP_SOURCES))
-BSP_OBJ  :=$(patsubst $(BSP_DIR)%.s,   $(OUTPUT_OBJDIR)%.o, $(BSP_SOURCES))
-UCOS_OBJ :=$(patsubst $(UCOS_DIR)%.c,  $(OUTPUT_OBJDIR)%.o, $(UCOS_SOURCES))
-BOOT_OBJ :=$(patsubst $(BOOT_DIR)%.s,  $(OUTPUT_OBJDIR)%.o, $(BOOT_SOURCES))
-LWIP_OBJ :=$(patsubst $(LWIP_DIR)%.c,  $(OUTPUT_OBJDIR)%.o, $(LWIP_SOURCES))
-PORTS_OBJ:=$(patsubst $(PORTS_DIR)%.c, $(OUTPUT_OBJDIR)%.o, $(PORTS_SOURCES))
+SYS_OBJ      :=$(patsubst $(SYS_DIR)%.c,     $(OUTPUT_OBJDIR)%.o, $(SYS_SOURCES))
+BSP_OBJ      :=$(patsubst $(BSP_DIR)%.c,     $(OUTPUT_OBJDIR)%.o, $(BSP_SOURCES))
+BSP_ASM_OBJ  :=$(patsubst $(BSP_DIR)%.s,     $(OUTPUT_OBJDIR)%.o, $(BSP_SOURCES))
+UCOS_OBJ     :=$(patsubst $(UCOS_DIR)%.c,    $(OUTPUT_OBJDIR)%.o, $(UCOS_SOURCES))
+BOOT_OBJ     :=$(patsubst $(BOOT_DIR)%.s,    $(OUTPUT_OBJDIR)%.o, $(BOOT_SOURCES))
+LWIP_OBJ     :=$(patsubst $(LWIP_DIR)%.c,    $(OUTPUT_OBJDIR)%.o, $(LWIP_SOURCES))
+PORTS_OBJ    :=$(patsubst $(PORTS_DIR)%.c,   $(OUTPUT_OBJDIR)%.o, $(PORTS_SOURCES))
+PORTS_ASM_OBJ:=$(patsubst $(PORTS_DIR)%.asm, $(OUTPUT_OBJDIR)%.o, $(PORTS_ASM_SOURCES))
 
 ################################################################################
 # OS Commands:
@@ -211,6 +218,8 @@ MKDIR := mkdir -p
 ################################################################################
 # Make Targets - The first target in the Makefile will be used as the default:
 all: $(BOOT_OBJ) $(PORTS_OBJ) $(UCOS_OBJ) $(LWIP_OBJ) $(BSP_OBJ) $(SYS_OBJ)
+
+	#$(PORTS_ASM_OBJ)
 
 print:
 	@echo $(PORTS_OBJ) $(SYS_OBJ) $(BSP_OBJ) $(UCOS_OBJ)
@@ -260,6 +269,12 @@ $(OUTPUT_OBJDIR)%.o: $(BSP_DIR)%.s
 	#@$(AS) -c $(CC_INCLUDES) $(AS_DEFINES) $(AS_FLAGS) $< -o $@
 
 $(OUTPUT_OBJDIR)%.o: $(BOOT_DIR)%.s
+	#@echo "(CC) $<"
+	#@echo "$(AS) -c $(CC_INCLUDES) $(AS_DEFINES) $(AS_FLAGS) $< -o $@"
+	#@$(MKDIR) $(dir $@)
+	#@$(AS) -c $(CC_INCLUDES) $(AS_DEFINES) $(AS_FLAGS) $< -o $@
+
+$(OUTPUT_OBJDIR)%.o: $(PORTS_DIR)%.asm
 	#@echo "(CC) $<"
 	#@echo "$(AS) -c $(CC_INCLUDES) $(AS_DEFINES) $(AS_FLAGS) $< -o $@"
 	#@$(MKDIR) $(dir $@)
