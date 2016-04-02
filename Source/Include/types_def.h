@@ -8,8 +8,12 @@
 #define INOUT
 
 #ifndef PACKED 
-#define PACKED  __packed//__attribute__ ((packed))
-#endif //PACKED
+#ifndef GCC
+#define PACKED __packed
+#else
+#define PACKED __attribute__((packed))
+#endif
+#endif /* PACKED */
 
 #ifndef NULL
 #define NULL                0
