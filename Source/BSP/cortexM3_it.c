@@ -12,6 +12,12 @@
 ******************************************************************************
 */
 
+#ifndef GCC                                     //If we're compiling with Keil
+#define COMPAT_IRQ __irq                        //  Keil's Toolchain likes __irq
+#else                                           //If we defined GCC
+#define COMPAT_IRQ __attribute__((interrupt))   //  GCC likes __attrib[...]
+#endif /* GCC */
+
 /* Includes ------------------------------------------------------------------*/
 #include "includes.h"
 /* Private typedef -----------------------------------------------------------*/
@@ -30,7 +36,7 @@ extern VOID BSP_LowMacIntISR(VOID);
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void NMIException(void)
+COMPAT_IRQ void NMIException(void)
 {
 }
 
@@ -95,7 +101,7 @@ VOID FaultHandler_c(UINT32 * FaultArgs)
 }
 
 
-__irq void HardFaultException(void)
+COMPAT_IRQ void HardFaultException(void)
 {
     FaultHandler_asm();
     /* Go to infinite loop when Hard Fault exception occurs */
@@ -112,7 +118,7 @@ __irq void HardFaultException(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void MemManageException(void)
+COMPAT_IRQ void MemManageException(void)
 {
     FaultHandler_asm();
     /* Go to infinite loop when Memory Manage exception occurs */
@@ -129,7 +135,7 @@ __irq void MemManageException(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void BusFaultException(void)
+COMPAT_IRQ void BusFaultException(void)
 {
     FaultHandler_asm();
     /* Go to infinite loop when Bus Fault exception occurs */
@@ -146,7 +152,7 @@ __irq void BusFaultException(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void UsageFaultException(void)
+COMPAT_IRQ void UsageFaultException(void)
 {
     FaultHandler_asm();
     /* Go to infinite loop when Usage Fault exception occurs */
@@ -163,7 +169,7 @@ __irq void UsageFaultException(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void DebugMonitor(void)
+COMPAT_IRQ void DebugMonitor(void)
 {
 }
 
@@ -174,7 +180,7 @@ __irq void DebugMonitor(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void SVCHandler(void)
+COMPAT_IRQ void SVCHandler(void)
 {
 }
 
@@ -185,7 +191,7 @@ __irq void SVCHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void PendSVC(void)
+COMPAT_IRQ void PendSVC(void)
 {
 }
 
@@ -197,7 +203,7 @@ __irq void PendSVC(void)
 * Return         : None
 *******************************************************************************/
 
-__irq void SysTickHandler(void)
+COMPAT_IRQ void SysTickHandler(void)
 {
     OS_CPU_SR  cpu_sr;
 
@@ -217,7 +223,7 @@ __irq void SysTickHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void WakeupCpu_IRQHandler(void)
+COMPAT_IRQ void WakeupCpu_IRQHandler(void)
 {
     BSP_WakeupCpuIntISR();
 }
@@ -229,7 +235,7 @@ __irq void WakeupCpu_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void EXTI0_IRQHandler(void)
+COMPAT_IRQ void EXTI0_IRQHandler(void)
 {
 }
 
@@ -240,7 +246,7 @@ __irq void EXTI0_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void EXTI1_IRQHandler(void)
+COMPAT_IRQ void EXTI1_IRQHandler(void)
 {
 }
 
@@ -251,7 +257,7 @@ __irq void EXTI1_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void EXTI2_IRQHandler(void)
+COMPAT_IRQ void EXTI2_IRQHandler(void)
 {
 }
 
@@ -262,7 +268,7 @@ __irq void EXTI2_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void EXTI3_IRQHandler(void)
+COMPAT_IRQ void EXTI3_IRQHandler(void)
 {
 }
 
@@ -273,7 +279,7 @@ __irq void EXTI3_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void EXTI4_IRQHandler(void)
+COMPAT_IRQ void EXTI4_IRQHandler(void)
 {
 }
 /*******************************************************************************
@@ -283,7 +289,7 @@ __irq void EXTI4_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void EXTI5_IRQHandler(void)
+COMPAT_IRQ void EXTI5_IRQHandler(void)
 {
 }
 
@@ -294,7 +300,7 @@ __irq void EXTI5_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void EXTI6_IRQHandler(void)
+COMPAT_IRQ void EXTI6_IRQHandler(void)
 {
 }
 /*******************************************************************************
@@ -304,7 +310,7 @@ __irq void EXTI6_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void EXTI7_IRQHandler(void)
+COMPAT_IRQ void EXTI7_IRQHandler(void)
 {
 }
 /*******************************************************************************
@@ -314,7 +320,7 @@ __irq void EXTI7_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void TMR1_IRQHandler(void)
+COMPAT_IRQ void TMR1_IRQHandler(void)
 {
     UINT32 RegEoi;
     
@@ -346,7 +352,7 @@ __irq void TMR1_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void TMR0_IRQHandler(void)
+COMPAT_IRQ void TMR0_IRQHandler(void)
 {
     UINT32 RegEoi;
     
@@ -378,7 +384,7 @@ __irq void TMR0_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void UART_IRQHandler(void)
+COMPAT_IRQ void UART_IRQHandler(void)
 {
 #ifdef HW_UART_IRQ_SUPPORT
      BSP_UartISR();
@@ -392,7 +398,7 @@ __irq void UART_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void WWDG0_IRQHandler(void)
+COMPAT_IRQ void WWDG0_IRQHandler(void)
 {
     void BSP_UartPutcPolled(UINT8 Data);
     
@@ -426,7 +432,7 @@ __irq void WWDG0_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void SMID_IRQHandler(void)
+COMPAT_IRQ void SMID_IRQHandler(void)
 {
     BSP_HostIntISR();
 }
@@ -438,7 +444,7 @@ __irq void SMID_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void LowMac_IRQHandler(void)
+COMPAT_IRQ void LowMac_IRQHandler(void)
 {
     BSP_LowMacIntISR();
 }
@@ -450,72 +456,72 @@ __irq void LowMac_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-__irq void I2C_IRQHandler(void)
+COMPAT_IRQ void I2C_IRQHandler(void)
 {}
-__irq void SPI_IRQHandler(void)
+COMPAT_IRQ void SPI_IRQHandler(void)
 {}
-__irq void IQCalibration_IRQHandler(void)
+COMPAT_IRQ void IQCalibration_IRQHandler(void)
 {
 }
-__irq void EXTI15_IRQHandler(void)
+COMPAT_IRQ void EXTI15_IRQHandler(void)
 {}
-__irq void EXTI14_IRQHandler(void)
+COMPAT_IRQ void EXTI14_IRQHandler(void)
 {}
-__irq void EXTI13_IRQHandler(void)
+COMPAT_IRQ void EXTI13_IRQHandler(void)
 {}
-__irq void EXTI12_IRQHandler(void)
+COMPAT_IRQ void EXTI12_IRQHandler(void)
 {}
-__irq void EXTI11_IRQHandler(void)
+COMPAT_IRQ void EXTI11_IRQHandler(void)
 {}
-__irq void EXTI10_IRQHandler(void)
+COMPAT_IRQ void EXTI10_IRQHandler(void)
 {}
-__irq void EXTI9_IRQHandler(void)
+COMPAT_IRQ void EXTI9_IRQHandler(void)
 {}
-__irq void EXTI8_IRQHandler(void)
+COMPAT_IRQ void EXTI8_IRQHandler(void)
 {}
-__irq void DUMMY0_IRQHandler(void)
+COMPAT_IRQ void DUMMY0_IRQHandler(void)
 {}
-__irq void DMA_IRQHandler(void)
+COMPAT_IRQ void DMA_IRQHandler(void)
 {
     BSP_DmaIntISR();
 }
-__irq void I2S_IRQHandler(void)
+COMPAT_IRQ void I2S_IRQHandler(void)
 {
 #ifdef HW_I2S_SUPPORT
      BSP_I2SIntISR();
 #endif
 }
-__irq void EXTI16_31_IRQnHandler(void)
+COMPAT_IRQ void EXTI16_31_IRQnHandler(void)
 {}
-__irq void DUMMY1_IRQHandler(void)
+COMPAT_IRQ void DUMMY1_IRQHandler(void)
 {}
-__irq void DUMMY2_IRQHandler(void)
+COMPAT_IRQ void DUMMY2_IRQHandler(void)
 {}
-__irq void DUMMY3_IRQHandler(void)
+COMPAT_IRQ void DUMMY3_IRQHandler(void)
 {}
-__irq void DUMMY4_IRQHandler(void)
+COMPAT_IRQ void DUMMY4_IRQHandler(void)
 {}
-__irq void DUMMY5_IRQHandler(void)
+COMPAT_IRQ void DUMMY5_IRQHandler(void)
 {}
-__irq void DUMMY6_IRQHandler(void)
+COMPAT_IRQ void DUMMY6_IRQHandler(void)
 {}
-__irq void DUMMY7_IRQHandler(void)
+COMPAT_IRQ void DUMMY7_IRQHandler(void)
 {}
-__irq void DUMMY8_IRQHandler(void)
+COMPAT_IRQ void DUMMY8_IRQHandler(void)
 {}
-__irq void DUMMY9_IRQHandler(void)
+COMPAT_IRQ void DUMMY9_IRQHandler(void)
 {}
-__irq void DUMMY10_IRQHandler(void)
+COMPAT_IRQ void DUMMY10_IRQHandler(void)
 {}
-__irq void DUMMY11_IRQHandler(void)
+COMPAT_IRQ void DUMMY11_IRQHandler(void)
 {}
-__irq void DUMMY12_IRQHandler(void)
+COMPAT_IRQ void DUMMY12_IRQHandler(void)
 {}
-__irq void DUMMY13_IRQHandler(void)
+COMPAT_IRQ void DUMMY13_IRQHandler(void)
 {}
-__irq void DUMMY14_IRQHandler(void)
+COMPAT_IRQ void DUMMY14_IRQHandler(void)
 {}
-__irq void DUMMY15_IRQHandler(void)
+COMPAT_IRQ void DUMMY15_IRQHandler(void)
 {}
 
 
