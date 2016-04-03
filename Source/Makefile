@@ -178,7 +178,7 @@ BOOT_SOURCES:=                     \
 
 ################################################################################
 # Compiler and linker options (flags and defines):
-CC_FLAGS:= -mthumb -mcpu=cortex-m3 -fno-builtin -std=gnu99 -Os -flto -nostdlib \
+CC_FLAGS:= -mthumb -mcpu=cortex-m3 -fno-builtin -std=gnu99 -Os -flto -nostdlib  \
            -fdata-sections --specs=nosys.specs -msoft-float -mfix-cortex-m3-ldrd
 AS_FLAGS:= 
 LD_FLAGS:= --gc-sections -nostartfiles -Map=GCC_TODO_map?.map -T TODO_linkerscript.ld
@@ -187,8 +187,8 @@ LD_FLAGS:= --gc-sections -nostartfiles -Map=GCC_TODO_map?.map -T TODO_linkerscri
 
 SDK_DEFINES:=               \
     GCC                     \
-    USE_CORTEX_M3           \
     LWIP_TIMEVAL_PRIVATE=0  \
+    USE_CORTEX_M3           \
     DEBUG_ON=0
 
 ################################################################################
@@ -217,7 +217,7 @@ MKDIR := mkdir -p
 
 ################################################################################
 # Make Targets - The first target in the Makefile will be used as the default:
-all: $(BOOT_OBJ) $(PORTS_OBJ) $(UCOS_OBJ) $(LWIP_OBJ) $(BSP_OBJ) $(SYS_OBJ)
+all: $(SYS_OBJ) $(BOOT_OBJ) $(PORTS_OBJ) $(UCOS_OBJ) $(LWIP_OBJ) $(BSP_OBJ)
 
 	#$(PORTS_ASM_OBJ)
 
