@@ -53,6 +53,20 @@ We won't try to link anything because we don't have a GNU linker script yet.
 The idea is to make sure the SDK doesn't have any kind of Keil-specific
 dependencies.
 
+- [Good post](http://www.keil.com/support/docs/2968.htm) on porting source code
+from GCC to Keil. Gives compiler instruction differences between the compilers.
+- [Great comment](https://github.com/tidklaas/nl6621/issues/1#issuecomment-204756480)
+from @tidklaas explaining some of the memory regions. He's managed to build and
+flash the NL6621 on SRAM.
+
+TODO:
+
+- Fix the compilation warnings regarding __dsb(0xf) and __isb(0xf) in mpu.c:64
+and mpu.c:66 -- `-Wimplicit-function-declaration`
+- Get rid of all the `-Wincompatible-pointer-types` compilation warnings
+- Write the compilation commands for the asm sources. Currently commented in the
+Makefile's File Creation Rules.
+
 ### Write a GNU linker script
 
 In order to compile our apps into flashable binaries, we'll need a linker script.

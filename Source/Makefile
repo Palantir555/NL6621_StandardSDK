@@ -9,6 +9,7 @@ BOOT_DIR  =$(SDK_SRCDIR)/BOOT
 UCOS_DIR  =$(SDK_SRCDIR)/uCOS-II
 PORTS_DIR =$(SDK_SRCDIR)/Ports/Cortex-M3
 SDK_INCDIR=$(SDK_SRCDIR)/Include
+APP_DIR   =$(SDK_SRCDIR)/App
 
 LWIP_SRCDIR =$(LWIP_DIR)/src
 LWIP_PORTDIR=$(LWIP_DIR)/port
@@ -32,6 +33,7 @@ OUTPUT_OBJDIR=$(OUTPUT_DIR)/objdir
 # Include folders:
 LWIP_INCDIRS:=                      \
     $(LWIP_DIR)/src/include         \
+    $(LWIP_DIR)/src/include/lwip    \
     $(LWIP_DIR)/src/include/ipv4    \
     $(LWIP_DIR)/src/include/ipv6    \
     $(LWIP_DIR)/port/include/netif  \
@@ -98,7 +100,12 @@ PORTS_HEADERS:=                 \
     $(PORTS_DIR)/os_cpu.h       \
     $(PORTS_DIR)/os_dmem.h
 
-#ALL_HEADERS := $(SDK_HEADERS) $(UCOS_HEADERS) $(BSP_HEADERS) $(PORTS_HEADERS)
+APP_HEADERS:=                           \
+    $(APP_DIR)/DhcpServer/dhcp_server.h \
+    $(APP_DIR)/DnsServer/dns_server.h
+
+#ALL_HEADERS :=$(SDK_HEADERS) $(UCOS_HEADERS) $(BSP_HEADERS) $(PORTS_HEADERS) \
+#              $(APP_SOURCES)
 
 ################################################################################
 # Sources:
@@ -173,8 +180,13 @@ PORTS_ASM_SOURCES:=           \
 BOOT_SOURCES:=                     \
     $(BOOT_DIR)/CortexM3_startup.s \
 
+APP_SOURCES:=                           \
+    $(APP_DIR)/DhcpServer/dhcp_server.c \
+    $(APP_DIR)/DnsServer/dns_server.c
+
 #ALL_SOURCES:= $(SDK_SOURCES) $(UCOS_SOURCES) $(BSP_SOURCES) $(PORTS_SOURCES) \
-#              $(BOOT_SOURCES) $(LWIP_SOURCES) $(PORTS_ASM_SOURCES)
+#              $(BOOT_SOURCES) $(LWIP_SOURCES) $(PORTS_ASM_SOURCES) \
+#              $(APP_SOURCES)
 
 ################################################################################
 # Compiler and linker options (flags and defines):
@@ -191,16 +203,24 @@ SDK_DEFINES:=               \
     USE_CORTEX_M3           \
     DEBUG_ON=0
 
+TOOL_DEFINES:=          \
+    TOOLCHAIN_GCC_ARM   \
+    __CORTEX_M3         \
+    TOOLCHAIN_GCC
+
+ALL_DEFINES_RAW:=$(SDK_DEFINES) $(TOOL_DEFINES)
+
 ################################################################################
 # Prepare arguments for GCC. Prepend -L, -I, -D, etc.:
 CC_LIBS     := $(patsubst %, -L%, $(ALL_LIBDIRS))
 CC_INCLUDES := $(patsubst %, -I%, $(INCDIRS))
-CC_DEFINES  := $(patsubst %, -D%, $(SDK_DEFINES))
+CC_DEFINES  := $(patsubst %, -D%, $(ALL_DEFINES_RAW))
 AS_DEFINES  :=
 
 ################################################################################
 # Build list of targets (The .o files invoked by the File Creation Rules):
 #patsubst(from, to, text): Replaces occurences of `from` in `text` with `to`
+APP_OBJ      :=$(patsubst $(APP_DIR)%.c,     $(OUTPUT_OBJDIR)%.o, $(APP_SOURCES))
 SYS_OBJ      :=$(patsubst $(SYS_DIR)%.c,     $(OUTPUT_OBJDIR)%.o, $(SYS_SOURCES))
 BSP_OBJ      :=$(patsubst $(BSP_DIR)%.c,     $(OUTPUT_OBJDIR)%.o, $(BSP_SOURCES))
 BSP_ASM_OBJ  :=$(patsubst $(BSP_DIR)%.s,     $(OUTPUT_OBJDIR)%.o, $(BSP_SOURCES))
@@ -217,9 +237,8 @@ MKDIR := mkdir -p
 
 ################################################################################
 # Make Targets - The first target in the Makefile will be used as the default:
-all: $(SYS_OBJ) $(BOOT_OBJ) $(PORTS_OBJ) $(UCOS_OBJ) $(LWIP_OBJ) $(BSP_OBJ)
-
-	#$(PORTS_ASM_OBJ)
+all: $(SYS_OBJ) $(BOOT_OBJ) $(PORTS_OBJ) $(UCOS_OBJ) $(LWIP_OBJ) $(BSP_OBJ) $(APP_OBJ)
+#$(PORTS_ASM_OBJ)
 
 print:
 	@echo $(PORTS_OBJ) $(SYS_OBJ) $(BSP_OBJ) $(UCOS_OBJ)
@@ -233,6 +252,12 @@ clean:
 ################################################################################
 # File Creation Rules:
 $(OUTPUT_OBJDIR)%.o: $(PORTS_DIR)%.c
+	@echo "(CC) $<"
+	@echo "$(CC) -c $(CC_INCLUDES) $(CC_DEFINES) $(CC_FLAGS) $< -o $@"
+	@$(MKDIR) $(dir $@)
+	@$(CC) -c $(CC_INCLUDES) $(CC_DEFINES) $(CC_FLAGS) $< -o $@
+
+$(OUTPUT_OBJDIR)%.o: $(APP_DIR)%.c
 	@echo "(CC) $<"
 	@echo "$(CC) -c $(CC_INCLUDES) $(CC_DEFINES) $(CC_FLAGS) $< -o $@"
 	@$(MKDIR) $(dir $@)
