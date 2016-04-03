@@ -88,8 +88,8 @@ extern UINT32 ApbClkFreq;
 #define MAX_CH_NUM      14
 #define MAC_ADDR_LEN    6 
 
-typedef PACKED union   _ASIC_VER_ID_STRUC  {
-    PACKED struct  {
+typedef PACKED_UNION_COMPAT _ASIC_VER_ID_STRUC  {
+    PACKED_STRUCT_COMPAT  {
         UINT8  ASICVer:4;     // 1000:6681, 0010:6621
         // 表征工艺信息（若工艺对射频影响过大，可以据此靠固件识别来调整RF_SPI）
         UINT8  Corner:4;      // 0000:TT, 0001:FF, 0010:FS, 0011:SF, 0100:SS
@@ -97,8 +97,8 @@ typedef PACKED union   _ASIC_VER_ID_STRUC  {
     UINT8  word;
 }   ASIC_VER_ID_STRUC, *PASIC_VER_ID_STRUC;
 
-typedef PACKED union _NIC_CINFIG1_STRUC {
-    PACKED struct {
+typedef PACKED_UNION_COMPAT _NIC_CINFIG1_STRUC {
+    PACKED_STRUCT_COMPAT {
         UINT8      HardwareRadioControl:1;  // 1:enable, 0:disable
         UINT8      Rsv1:1;
         UINT8      ExternalLNA:1;           // external LNA enable for 2.4G
@@ -111,7 +111,7 @@ typedef PACKED union _NIC_CINFIG1_STRUC {
 }   NIC_CONFIG1_STRUC, *PNIC_CONFIG1_STRUC;
 
 // 机台测试负责写ChipID和6681，其余的模组厂测负责写
-typedef PACKED struct _NV_INFO     
+typedef PACKED_STRUCT_COMPAT _NV_INFO     
 {
     // 0 ~ 6: Year, Month, Day, Hour, Minute, Second, Site
     // 譬如<55:0>=0000 0011 - 0101 0111 - 0101 1001 - 0001 0011 - 0010 0001 - 0001 0001 - 0001 0011
@@ -213,7 +213,7 @@ extern UINT8   PermanentAddress[MAC_ADDR_LEN];
 
 
 // 该结构体的大小定义为4字节整数倍
-typedef PACKED struct _FW_HDR
+typedef PACKED_STRUCT_COMPAT _FW_HDR
 {
     UINT8   StartFlag[8]; // Nu_link
     UINT32 FwSize; // total firmware image len, including fw hdr and tail
@@ -241,7 +241,7 @@ typedef PACKED struct _FW_HDR
 
 } FW_HDR;
 
-typedef PACKED struct _FW_TAIL
+typedef PACKED_STRUCT_COMPAT _FW_TAIL
 {
     UINT32 CheckWord; // CRC32/SUM32 value of the firmware payload.
     UINT8   EndFlag[8]; //  'D', 'E', 'A', 'D', 'B', 'E', 'E', 'F'

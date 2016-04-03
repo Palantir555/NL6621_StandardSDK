@@ -8,11 +8,22 @@
 #define INOUT
 
 #ifndef PACKED 
+
 #ifndef GCC
 #define PACKED __packed
 #else
 #define PACKED __attribute__((packed))
 #endif
+
+
+#ifdef GCC
+#define PACKED_STRUCT_COMPAT struct __attribute__((packed))
+#define PACKED_UNION_COMPAT  union  __attribute__((packed))
+#else /* __packed attribute for Keil */
+#define PACKED_STRUCT_COMPAT __packed struct
+#define PACKED_UNION_COMPAT  __packed union
+#endif /* GCC */
+
 #endif /* PACKED */
 
 #ifndef NULL

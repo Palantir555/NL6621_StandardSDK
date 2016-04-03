@@ -58,7 +58,7 @@
 #define QSPI_RD_PREFETCH_OFFSET     19
 
 
-typedef PACKED struct _QSPI_REGS {
+typedef PACKED_STRUCT_COMPAT _QSPI_REGS {
     VUINT32 CTRLR0;      // 0x00
     VUINT32 CTRLR1;      // 0x04
     VUINT32 SSIENR;    // 0x08
