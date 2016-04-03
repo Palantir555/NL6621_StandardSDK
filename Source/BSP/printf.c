@@ -70,10 +70,12 @@ void _ttywrch(int ch)
 ** finished executing.
 */
 
+#ifndef GCC /* 'ferror' is available as a macro in GCC */
 int ferror(FILE *f)
 {
     return EOF;
 }
+#endif /* GCC */
 
 void _sys_exit(int return_code)
 {
